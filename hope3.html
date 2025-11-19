@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learning Management system</title>
+<style>
+   :root {
+    --primary: #0078D7;
+    --primary-dark: #005fa3;
+    --bg: #f4f6f8;
+    --card: #fff;
+    --muted: #666;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: #222;
+    padding-top:74px;
+  }
+
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: var(--primary);
+    color: #fff;
+    padding: 14px 18px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  header h1 { margin: 0; font-size: 18px; font-weight: 700; }
+  header small { font-size: 13px; font-style: italic; color: rgba(255,255,255,0.95); margin-left: 8px; font-weight:400; }
+
+  .container{ display:flex; justify-content:center; align-items:center; min-height:62vh; padding:20px }
+  .box{ background:var(--card); padding:22px; border-radius:10px; width:380px; box-shadow:0 6px 18px rgba(0,0,0,0.06); text-align:center }
+  button { background: var(--primary); color: #fff; border: none; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 15px; }
+  button.alt { background: #666; }
+  .back-btn { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+  input[type="text"], input[type="password"], input[type="file"], select { width: 82%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid #ccc; }
+  #dashboard { display: none; min-height:100vh }
+  .sidebar { width: 240px; background: var(--primary-dark); color: #fff; position: fixed; left: -260px; top: 74px; bottom: 0; padding-top: 20px; transition: left .25s; z-index: 900; }
+  .sidebar a { color: #fff; display: block; padding: 12px 16px; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .sidebar a:hover { background: var(--primary); }
+  .main-content { margin-left: 0; transition: margin-left 0.25s; padding: 22px; padding-top: 28px; min-height:100vh }
+  .menu-icon { font-size: 22px; color: var(--primary); cursor: pointer; margin-left: 8px; }
+  #main-area { background: var(--card); padding: 18px; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.04); min-height: 420px; }
+  footer { position: relative; bottom: 0; width: 100%; background-color: #1a1a1a; color: #fff; text-align: center; padding: 30px 20px; margin-top: 30px; }
+  footer p { margin: 6px 0; font-size: 14px; }
+  footer h2 { margin-top: 10px; font-size: 18px; font-weight: 700; }
+  footer span { font-size: 13px; font-style: italic; color: rgba(255,255,255,0.95); margin-left: 8px; font-weight: 400; }
+  @media (max-width: 768px) {
+    .box { width: 90%; }
+    .main-content { padding-left: 10px; padding-right: 10px; padding-bottom: 120px; }
+  }
+
+ .resource-list li{padding:10px;margin:8px 0;border-radius:8px;background:#f8fafc;display:flex;justify-content:space-between;align-items:center}
+  .small-btn{background:transparent;border:1px solid var(--primary);color:var(--primary);padding:6px 10px;border-radius:6px;cursor:pointer;margin-left:6px;text-decoration:none}
+  .categories,.subcats{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .cat-btn{background:var(--primary);color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
+  .upload-form{margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .meta{font-size:12px;color:var(--muted);margin-left:8px}
+  .preview{border-radius:8px;padding:12px;background:#fcfdff;border:1px solid #e6eefb;margin-bottom:12px}
+  .close-preview{background:transparent;border:1px solid #ccc;padding:6px 10px;border-radius:6px;cursor:pointer}
+  a.link-btn{background:transparent;border:1px solid var(--primary);color:var(--primary);padding:6px 10px;border-radius:6px;cursor:pointer;text-decoration:none;margin-left:6px}
+</style>
+
+</head>
+<body>
+
+
+      <header>
+  <h1>Learning Management System</h1>
+  <small>— Developed by Jaswanth Sankar (M.Sc. Computer Science)</small>
+</header>
+
+
+
+<!-- HOME: role selection -->
+<div class="container" id="home">
+  <div class="box">
+    <h2>Welcome!</h2>
+    <p>Select your role</p>
+    <div style="display:flex;justify-content:center;gap:12px;margin-top:12px">
+      <button onclick="openLogin('student')">Student</button>
+      <button onclick="openLogin('teacher')">Teacher</button>
+    </div>
+    <p style="font-size:13px;color:#555;margin-top:12px">Use signup to create a local account (stored in browser).</p>
+  </div>
+</div>
+
+<!-- AUTH (login/signup) -->
+<div class="container" id="authPage" style="display:none">
+  <div class="box">
+    <h2 id="formTitle">Login</h2>
+    <div style="position:absolute; right:18px; top:86px;">
+      <button class="back-btn" onclick="goBack()">🔙 Back</button>
+    </div>
+    <input type="text" id="username" placeholder="Enter username" />
+    <input type="password" id="password" placeholder="Enter password" />
+    <div style="display:flex;justify-content:center;gap:10px;margin-top:8px">
+      <button onclick="handleAuth()">Login</button>
+      <button onclick="toggleForm()" class="alt">Signup</button>
+    </div>
+    <span class="forgot" onclick="forgotPassword()" style="display:block;margin-top:8px;color:var(--primary);cursor:pointer">Forgot Password?</span>
+    <p id="signupNote" style="font-size:13px;color:#444;margin-top:8px">Don't have account? Click Signup button above.</p>
+  </div>
+</div>
+
+
+<!-- DASHBOARD (single page app area) -->
+<div id="dashboard">
+  <div class="sidebar" id="sidebar">
+    <a href="#" onclick="loadContent('materials')">📘 Study Materials</a>
+    <a href="#" onclick="loadContent('videos')">🎥 Videos</a>
+    <a href="#" onclick="loadContent('tasks')">📝 Tasks</a>
+    <a href="#" onclick="logout()">🚪 Logout</a>
+  </div>
+
+  <div class="main-content" id="mainContent">
+    <span class="menu-icon" onclick="toggleMenu()">☰</span>
+    <div id="main-area">
+      <h2>Welcome to our online learning Management system</h2>
+      <p>Select an option from the sidebar.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Footer Section -->
+<footer>
+  <p>Learn skills that shape your future and open new career opportunities.</p>
+  <p>📞 +91 8074342346 | ✉️ jaswanthsankargude0001@gmail.com</p>
+  <p>© 2025 All Rights Reserved.</p>
+  <h2>Learning Management System</h2>
+  <span>— Developed by Jaswanth Sankar (M.Sc. Computer Science)</span>
+</footer>
+<script>
+
+const MOCKAPI_URL = "https://6906e95cb1879c890ed84ed3.mockapi.io/materials";
+
+/* Global state */
+let role = "";
+let isLogin = true;
+let sidebarVisible = false;
+
+/* Categories structure (from original) */
+const CATEGORIES = {
+  frontend: { label: "Frontend", subs: ["html","css","js","frameworks"] },
+  backend: { label: "Backend", subs: ["C","python","java"] },
+  database: { label: "Database", subs: ["sql","nosql"] },
+  ai: { label: "AI/ML", subs: ["ai","ml","dl"] },
+  ds: { label: "Data Analytics", subs: ["Excel","sql1","python1","Power Bi"] },
+  cc: { label: "cloud computing", subs: ["ntg bayya"] },
+  cs: { label: "Cyber security", subs: ["ntg bayya"] },
+};
+const SUB_LABELS = {
+  html: "HTML", css:"CSS", js:"JavaScript", frameworks:"Libraries & Frameworks",
+  node:"Node.js", python:"Python/Django", java:"Java/Spring", sql:"SQL (MySQL/Postgres)", nosql:"NoSQL (MongoDB)",
+  ai:"AI",ml:"ML",dl:"DL", python1:"Numpy & Pandas", sql1:"SQL"
+};
+
+/* UI helpers */
+function openLogin(selectedRole) {
+  role = selectedRole;
+  const home = document.getElementById("home");
+  if(home) home.style.display = "none";
+  const auth = document.getElementById("authPage");
+  if(auth) auth.style.display = "flex";
+  const ft = document.getElementById("formTitle");
+  if(ft) ft.innerText = `${role.charAt(0).toUpperCase() + role.slice(1)} Login`;
+  isLogin = true;
+
+  // Hide signup note for teacher (predefined account)
+  if (role === "teacher") {
+    const sn = document.getElementById("signupNote");
+    if(sn) sn.style.display = "none";
+  } else {
+    const sn = document.getElementById("signupNote");
+    if(sn) sn.style.display = "block";
+  }
+}
+
+function goBack() {
+  const ap = document.getElementById("authPage");
+  const hm = document.getElementById("home");
+  if(ap) ap.style.display = "none";
+  if(hm) hm.style.display = "flex";
+}
+
+function toggleForm() {
+  if (role === "teacher") {
+    alert("Teacher cannot signup. Use predefined credentials.");
+    return;
+  }
+  isLogin = !isLogin;
+  const ft = document.getElementById("formTitle");
+  if(ft) ft.innerText = `${role.charAt(0).toUpperCase() + role.slice(1)} ${isLogin ? "Login" : "Signup"}`;
+  const sn = document.getElementById("signupNote");
+  if(sn) sn.style.display = isLogin ? "block" : "none";
+}
+
+/* Forgot password (prompt-based) */
+function forgotPassword() {
+  const username = prompt("Enter your username for password retrieval:");
+  if (!username) return alert("Username required.");
+  const key = `${role}_${username}`;
+  const stored = localStorage.getItem(key);
+  if (!stored) return alert("User not found!");
+  const user = JSON.parse(stored);
+  alert(`Password for ${username}: ${user.password}`);
+}
+
+/* Auth handling */
+function handleAuth() {
+  const usernameEl = document.getElementById("username");
+  const passwordEl = document.getElementById("password");
+  const username = (usernameEl && usernameEl.value.trim()) || "";
+  const password = (passwordEl && passwordEl.value.trim()) || "";
+
+  if (!username || !password) {
+    alert("Enter username and password.");
+    return;
+  }
+
+  // ✅ Multiple predefined teacher accounts
+  const predefinedTeachers = [
+    { username: "teacher1", password: "67890" },
+    { username: "teacher2", password: "abcde" },
+    { username: "jassuuu", password: "12345" }
+  ];
+
+  if (role === "teacher") {
+    const validTeacher = predefinedTeachers.find(
+      (t) => t.username === username && t.password === password
+    );
+    if (validTeacher) {
+      localStorage.setItem("current_user", "teacher_" + username);
+      alert(`Welcome ${username}! Login successful.`);
+      openDashboard();
+    } else {
+      alert("Invalid teacher credentials!");
+    }
+    return;
+  }
+
+  // Other roles (students, admins, etc.) use localStorage signup/login
+  const key = `${role}_${username}`;
+  if (isLogin) {
+    const stored = localStorage.getItem(key);
+    if (!stored) return alert("Account not found. Signup first.");
+    const user = JSON.parse(stored);
+    if (user.password !== password) return alert("Incorrect password.");
+    localStorage.setItem("current_user", key);
+    openDashboard();
+  } else {
+    if (localStorage.getItem(key)) return alert("User already exists. Login instead.");
+    localStorage.setItem(key, JSON.stringify({ username, password, role }));
+    alert("Account created. You can now login.");
+    isLogin = true;
+    const ft = document.getElementById("formTitle");
+    if(ft) ft.innerText = `${role.charAt(0).toUpperCase() + role.slice(1)} Login`;
+  }
+}
+
+/* Sidebar show/hide helpers - work with your CSS that uses left/top values */
+function showSidebar(){
+  const sb = document.getElementById("sidebar");
+  const mc = document.getElementById("mainContent");
+  if(!sb || !mc) return;
+  sb.style.left = "0";
+  mc.style.marginLeft = "240px";
+  sidebarVisible = true;
+}
+function hideSidebar(){
+  const sb = document.getElementById("sidebar");
+  const mc = document.getElementById("mainContent");
+  if(!sb || !mc) return;
+  sb.style.left = "-260px";
+  mc.style.marginLeft = "0";
+  sidebarVisible = false;
+}
+
+/* Sidebar toggle */
+function toggleMenu(){
+  const sb = document.getElementById("sidebar");
+  const mc = document.getElementById("mainContent");
+  if(!sb || !mc) return;
+  if(sidebarVisible){ hideSidebar(); }
+  else { showSidebar(); }
+}
+
+/* When top menu buttons (Study Materials, Videos, Tasks, Logout) clicked:
+   - show the related main content
+   - hide the sidebar immediately (mobile-like behavior)
+*/
+function handleTopMenuClick(section){
+  // Use existing loadContent if present, otherwise fallback to manual
+  if(typeof loadContent === "function"){
+    loadContent(section);
+  } else {
+    // fallback: show/hide basic areas
+    const main = document.getElementById("main-area");
+    if(main) main.innerHTML = `<h2>${section}</h2><p>Loading ${section}...</p>`;
+  }
+
+  // hide sidebar (mobile behavior)
+  hideSidebar();
+}
+
+/* Preview helpers: single inline preview */
+function clearPreview(){ const p = document.getElementById("previewArea"); if(p) p.remove(); }
+function renderPreview(title, htmlContent){
+  clearPreview();
+  const main = document.getElementById("main-area");
+  if(!main) return;
+  const preview = document.createElement("div");
+  preview.id = "previewArea"; preview.className = "preview";
+  preview.innerHTML = `<h4>${escapeHtml(title)} <button class="close-preview" onclick="clearPreview()">Close</button></h4>${htmlContent}`;
+  main.prepend(preview);
+  preview.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function escapeHtml(str){ return String(str||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+/* Open dashboard only after login */
+function openDashboard(){
+  const ap = document.getElementById("authPage");
+  const db = document.getElementById("dashboard");
+  if(ap) ap.style.display = "none";
+  if(db) db.style.display = "block";
+  const cur = localStorage.getItem("current_user") || "";
+  const uname = cur.split("_").slice(1).join("_");
+  if(document.getElementById("main-area")){
+    document.getElementById("main-area").innerHTML = `<h2>Welcome ${escapeHtml(uname || "")}</h2><p>Click the sections above to navigate. For extra options, click the three lines on top.</p>`;
+  }
+}
+
+/* Teacher functions for Materials */
+function showTeacherSubtopic(categoryKey){
+  const area = document.getElementById("teacher-subtopic-area");
+  if(!area) return;
+  const subList = CATEGORIES[categoryKey].subs;
+  let inner = `<h3 style="margin-top:12px">${CATEGORIES[categoryKey].label} — Select Subtopic</h3><div class="subcats">`;
+  subList.forEach(s => inner += `<button class="cat-btn" onclick="renderTeacherUpload('${categoryKey}','${s}')">${SUB_LABELS[s]||s}</button>`);
+  inner += `</div>`;
+  area.innerHTML = inner;
+  const fl = document.getElementById("teacher-file-list");
+  if(fl) fl.innerHTML = "";
+}
+
+function renderTeacherUpload(categoryKey, subKey){
+  const fileListDiv = document.getElementById("teacher-file-list");
+  if(!fileListDiv) return;
+  fileListDiv.innerHTML = `
+    <h4 style="margin-top:12px">${CATEGORIES[categoryKey].label} → ${SUB_LABELS[subKey] || subKey}</h4>
+    <div class="upload-form">
+      <input type="file" id="uploadFile" multiple />
+      <div><button onclick="uploadFile('pdf','${categoryKey}','${subKey}')">Upload File(s)</button></div>
+    </div>
+    <ul class="resource-list" id="materialList" style="margin-top:12px;"></ul>
+  `;
+  // attach change listener safely (element exists now)
+  const input = document.getElementById("uploadFile");
+  if(input){
+    input.addEventListener("change", function() {
+      const file = this.files[0];
+      if (file && file.size > 10 * 1024 * 1024) { // 10 MB limit
+        alert("File size must be less than 10 MB!");
+        this.value = ""; // clear file
+      }
+    });
+  }
+  displayUploaded('pdf', categoryKey, subKey);
+}
+
+/* Teacher functions for Videos */
+function showTeacherVideoSubtopic(categoryKey){
+  const area = document.getElementById("teacher-video-subtopic-area");
+  if(!area) return;
+  const subList = CATEGORIES[categoryKey].subs;
+  let inner = `<h3 style="margin-top:12px">${CATEGORIES[categoryKey].label} — Select Subtopic (Video)</h3><div class="subcats">`;
+  subList.forEach(s => inner += `<button class="cat-btn" onclick="renderTeacherVideoUpload('${categoryKey}','${s}')">${SUB_LABELS[s]||s}</button>`);
+  inner += `</div>`;
+  area.innerHTML = inner;
+  const fl = document.getElementById("teacher-video-list");
+  if(fl) fl.innerHTML = "";
+}
+
+function renderTeacherVideoUpload(categoryKey, subKey){
+  const listDiv = document.getElementById("teacher-video-list");
+  if(!listDiv) return;
+  listDiv.innerHTML = `
+    <h4 style="margin-top:12px">${CATEGORIES[categoryKey].label} → ${SUB_LABELS[subKey] || subKey} (Videos)</h4>
+    <div class="upload-form">
+      <input type="text" id="videoLink" placeholder="YouTube link or URL" style="width:70%;padding:8px;border-radius:6px;border:1px solid #ccc"/>
+      <div style="margin-top:8px;"><button onclick="uploadFile('video','${categoryKey}','${subKey}')">Add Video</button></div>
+    </div>
+    <ul class="resource-list" id="videoList" style="margin-top:12px;"></ul>
+  `;
+  displayUploaded('video', categoryKey, subKey);
+}
+
+/* ====== unchanged functions above ====== */
+/* (all your login/sidebar/dashboard/etc remain exactly same) */
+
+/* ✅ Modified uploadFile – store base64 dataURL for PDFs */
+function uploadFile(type, categoryKey, subKey) {
+  if (type === 'pdf') {
+    const input = document.getElementById("uploadFile");
+    if (!input || !input.files.length) return alert("Select file(s).");
+
+    const files = Array.from(input.files);
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const base64Data = e.target.result; // data:application/pdf;base64,...
+        fetch(MOCKAPI_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: file.name,
+            data: base64Data, // ✅ Store PDF content
+            category: categoryKey,
+            subcategory: subKey,
+            type: "pdf",
+            uploadedAt: new Date().toISOString()
+          })
+        }).then(() => displayUploaded('pdf', categoryKey, subKey));
+      };
+      reader.readAsDataURL(file); // ✅ Convert to base64
+    });
+
+    alert("✅ File(s) uploaded successfully!");
+    input.value = "";
+  }
+
+  else if (type === 'video') {
+    const linkEl = document.getElementById("videoLink");
+    if (!linkEl) return alert("Video input not found.");
+    const link = linkEl.value.trim();
+    if (!link) return alert("Enter video URL.");
+    fetch(MOCKAPI_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: link,
+        link: link,
+        category: categoryKey,
+        subcategory: subKey,
+        type: "video",
+        uploadedAt: new Date().toISOString()
+      })
+    }).then(() => displayUploaded('video', categoryKey, subKey));
+    alert("✅ Video link saved!");
+    linkEl.value = "";
+  }
+
+  else if (type === 'task') {
+    const tEl = document.getElementById("taskText");
+    if (!tEl) return alert("Task input not found.");
+    const text = tEl.value.trim();
+    if (!text) return alert("Enter task.");
+    fetch(MOCKAPI_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: text,
+        category: "task",
+        subcategory: "general",
+        type: "task",
+        uploadedAt: new Date().toISOString()
+      })
+    }).then(() => displayUploaded('task'));
+    alert("✅ Task added!");
+    tEl.value = "";
+  }
+}
+
+// ✅ Delete item directly from MockAPI (shared for pdf/video/task)
+function deleteFromMockAPI(id, type, categoryKey, subKey) {
+  const MOCKAPI_URL = "https://6906e95cb1879c890ed84ed3.mockapi.io/materials";
+  if (!confirm("Are you sure you want to delete this item?")) return;
+
+  fetch(`${MOCKAPI_URL}/${id}`, { method: "DELETE" })
+    .then(() => {
+      alert("🗑️ Deleted successfully!");
+      displayUploaded(type, categoryKey, subKey);
+    })
+    .catch(err => {
+      console.error("Delete failed", err);
+      alert("❌ Failed to delete item.");
+    });
+}
+
+
+/* Student functions for Materials */
+function showStudentSubtopics(categoryKey){
+  const area = document.getElementById("student-subtopic-area");
+  if(!area) return;
+  const subs = CATEGORIES[categoryKey].subs;
+  let html = `<h3 style="margin-top:12px">${CATEGORIES[categoryKey].label} — Subtopics</h3><div class="subcats">`;
+  subs.forEach(s => html += `<button class="cat-btn" onclick="showStudentFiles('${categoryKey}','${s}')">${SUB_LABELS[s]||s}</button>`);
+  html += `</div><div id="student-file-list" style="margin-top:12px;"></div>`;
+  area.innerHTML = html;
+}
+
+/* ✅ Modified showStudentFiles – fetches & opens stored Base64 */
+function showStudentFiles(categoryKey, subKey) {
+  clearPreview();
+  const container = document.getElementById("student-file-list");
+  if (!container) return;
+  container.innerHTML = "<p>Loading...</p>";
+
+  fetch(MOCKAPI_URL)
+    .then(res => res.json())
+    .then(data => {
+      const filtered = data.filter(
+        i => i.category === categoryKey && i.subcategory === subKey && i.type === 'pdf'
+      );
+
+      if (filtered.length === 0) {
+        container.innerHTML = "<ul class='resource-list'><li>No files uploaded yet.</li></ul>";
+        return;
+      }
+
+      const html = filtered.map(f => {
+        const fileUrl = f.data || "#"; // ✅ use base64 data stored
+        const safeName = escapeHtml(f.name || "file.pdf");
+        const uploadTime = f.uploadedAt ? new Date(f.uploadedAt).toLocaleString() : "Unknown";
+
+        return `
+        <li style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span>📄 ${safeName}
+            <span class="meta">(${uploadTime})</span>
+          </span>
+          <span class="file-actions">
+            <button class="small-btn" onclick="openFile('${fileUrl}','${safeName}')">Open</button>
+            <button class="small-btn" onclick="downloadFile('${fileUrl}','${safeName}')">Download</button>
+          </span>
+        </li>`;
+      }).join('');
+
+      container.innerHTML = `<ul class="resource-list">${html}</ul>`;
+    })
+    .catch(err => {
+      console.error("Fetch failed", err);
+      container.innerHTML = "<p style='color:red'>❌ Unable to load files.</p>";
+    });
+}
+
+/* ✅ Modified downloadFile – handles base64 properly */
+function downloadFile(fileUrl, fileName) {
+  try {
+    if (fileUrl.startsWith("data:")) {
+      const blob = dataURLToBlob(fileUrl);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } else {
+      const a = document.createElement('a');
+      a.href = fileUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  } catch (err) {
+    console.error("Download failed:", err);
+    alert("❌ Download failed. Please try again.");
+  }
+}
+
+/* (rest of your code — all other functions remain unchanged) */
+
+function dataURLToBlob(dataURL) {
+  const arr = dataURL.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) u8arr[n] = bstr.charCodeAt(n);
+  return new Blob([u8arr], { type: mime });
+}
+
+
+/* ===== openFile (works with data URLs and hosted URLs) ===== */
+function openFile(dataURL, name){
+  clearPreview();
+  if(typeof dataURL !== 'string'){ renderPreview(name||'Preview', "<p>Preview not available.</p>"); return; }
+  const lower = dataURL.toLowerCase();
+  if(lower.startsWith("data:")){
+    if(lower.startsWith("data:application/pdf")){
+      renderPreview(name, `<iframe src="${dataURL}" style="width:100%;height:70vh;border-radius:8px;border:none"></iframe>`);
+      return;
+    } else if(lower.startsWith("data:image/")){
+      renderPreview(name, `<div style="text-align:center"><img src="${dataURL}" alt="${escapeHtml(name)}" style="max-width:100%;border-radius:6px"/></div>
+        <p style="text-align:center;margin-top:8px"><a class="small-btn" href="${dataURL}" download="${escapeHtml(name)}">Download ${escapeHtml(name)}</a></p>`);
+      return;
+    } else if(lower.startsWith("data:video/")){
+      renderPreview(name, `<video controls style="width:100%;max-height:70vh;border-radius:8px"><source src="${dataURL}">Your browser does not support the video tag.</video>`);
+      return;
+    }
+  }
+  // treat as a normal URL
+  try{
+    const urlObj = new URL(dataURL);
+    if(dataURL.includes("youtube.com") || dataURL.includes("youtu.be")){
+      let embed = dataURL.includes("watch?v=") ? dataURL.replace("watch?v=", "embed/") : dataURL.includes("youtu.be/") ? dataURL.replace("youtu.be/", "www.youtube.com/embed/") : dataURL;
+      renderPreview(name, `<iframe src="${embed}" style="width:100%;height:60vh;border-radius:8px;border:none"></iframe>`);
+      return;
+    }
+    const ext = urlObj.pathname.split('.').pop().toLowerCase();
+    if(ext === "pdf"){
+      renderPreview(name, `<iframe src="${dataURL}" style="width:100%;height:70vh;border-radius:8px;border:none"></iframe>`);
+      return;
+    } else if(["png","jpg","jpeg","gif","webp"].includes(ext)){
+      renderPreview(name, `<div style="text-align:center"><img src="${dataURL}" alt="${escapeHtml(name)}" style="max-width:100%;border-radius:6px"/></div>
+        <p style="text-align:center;margin-top:8px"><a class="small-btn" href="${dataURL}" download="${escapeHtml(name)}">Download ${escapeHtml(name)}</a></p>`);
+      return;
+    } else if(["mp4","webm","ogg"].includes(ext)){
+      renderPreview(name, `<video controls style="width:100%;max-height:70vh;border-radius:8px"><source src="${dataURL}">Your browser does not support the video tag.</video>`);
+      return;
+    }
+    renderPreview(name, `<p>Preview not available inline. <a href="${dataURL}" target="_blank">Open ${escapeHtml(name)} in a new tab</a></p>`);
+  } catch(e){
+    renderPreview(name, `<p>Preview not available. <a href="${dataURL}" target="_blank">Open in new tab</a></p>`);
+  }
+}
+
+
+
+/* Student functions for Materials (merged: fetch from MockAPI + open/download UI present) */
+function showStudentSubtopics(categoryKey){
+  const area = document.getElementById("student-subtopic-area");
+  if(!area) return;
+  const subs = CATEGORIES[categoryKey].subs;
+  let html = `<h3 style="margin-top:12px">${CATEGORIES[categoryKey].label} — Subtopics</h3><div class="subcats">`;
+  subs.forEach(s => html += `<button class="cat-btn" onclick="showStudentFiles('${categoryKey}','${s}')">${SUB_LABELS[s]||s}</button>`);
+  html += `</div><div id="student-file-list" style="margin-top:12px;"></div>`;
+  area.innerHTML = html;
+}
+
+/* Student view functions for Videos (using MockAPI) */
+function showStudentVideoSubtopics(categoryKey){
+  const area = document.getElementById("student-video-subtopic-area");
+  if(!area) return;
+  const subs = CATEGORIES[categoryKey].subs;
+  let html = `<h3 style="margin-top:12px">${CATEGORIES[categoryKey].label} — Video Subtopics</h3><div class="subcats">`;
+  subs.forEach(s => html += `<button class="cat-btn" onclick="showStudentVideoFiles('${categoryKey}','${s}')">${SUB_LABELS[s]||s}</button>`);
+  html += `</div><div id="student-video-list" style="margin-top:12px;"></div>`;
+  area.innerHTML = html;
+}
+
+function showStudentVideoFiles(categoryKey, subKey){
+  clearPreview();
+  const container = document.getElementById("student-video-list");
+  if (!container) return;
+
+  container.innerHTML = "<p>Loading...</p>";
+  fetch(MOCKAPI_URL)
+    .then(res => res.json())
+    .then(data => {
+      const arr = data.filter(item => item.category === categoryKey && item.subcategory === subKey && item.type === "video");
+      if (!arr.length) {
+        container.innerHTML = "<ul class='resource-list'><li>No videos uploaded yet.</li></ul>";
+        return;
+      }
+
+      let html = "";
+      arr.forEach((v, idx) => {
+        const link = v.link || v.name || "#";
+        html += `<li style="display:flex;justify-content:space-between;align-items:center">
+          <span>🎥 <a href="${link}" target="_blank">${escapeHtml(v.name || v.link)}</a> <span class="meta">(${new Date(v.uploadedAt).toLocaleString()})</span></span>
+          <span>
+            <button class="small-btn" onclick="(function(){ if('${link}'==='#') return alert('No link'); window.open('${link}','_blank'); })()">Open</button>
+          </span>
+        </li>`;
+      });
+      container.innerHTML = `<ul class="resource-list">${html}</ul>`;
+    })
+    .catch(err => {
+      console.error("Fetch failed", err);
+      container.innerHTML = "<p style='color:red'>❌ Unable to load videos.</p>";
+    });
+}
+
+/* Load content (student & teacher aware) - keeps your original behavior */
+function loadContent(section){
+  const main = document.getElementById("main-area");
+  if(!main) return;
+  localStorage.setItem("lastSection", section);
+  clearPreview();
+
+  if(section === 'materials'){
+    if(role === 'teacher'){
+      main.innerHTML = `
+        <h2>📘 Upload Study Materials — Teacher</h2>
+        <div class="categories" id="categoryRow"></div>
+        <div id="teacher-subtopic-area"></div>
+        <div id="teacher-file-list" style="margin-top:12px;"></div>
+      `;
+      const row = document.getElementById("categoryRow");
+      Object.keys(CATEGORIES).forEach(cat => {
+        const btn = document.createElement("button"); btn.className = "cat-btn";
+        btn.innerText = CATEGORIES[cat].label;
+        btn.onclick = () => showTeacherSubtopic(cat);
+        row.appendChild(btn);
+      });
+    } else {
+      main.innerHTML = `
+        <h2>📘 Study Materials</h2>
+        <div class="categories" id="student-category-row"></div>
+        <div id="student-subtopic-area"></div>
+      `;
+      const row = document.getElementById("student-category-row");
+      Object.keys(CATEGORIES).forEach(cat => {
+        const btn = document.createElement("button"); btn.className = "cat-btn";
+        btn.innerText = CATEGORIES[cat].label;
+        btn.onclick = () => { showStudentSubtopics(cat); if(window.innerWidth<=768) hideSidebar(); };
+        row.appendChild(btn);
+      });
+    }
+  } else if(section === 'videos'){
+    if(role === 'teacher'){
+      main.innerHTML = `
+        <h2>🎥 Upload Videos — Teacher</h2>
+        <div class="categories" id="videoCategoryRow"></div>
+        <div id="teacher-video-subtopic-area"></div>
+        <div id="teacher-video-list" style="margin-top:12px;"></div>
+      `;
+      const row = document.getElementById("videoCategoryRow");
+      Object.keys(CATEGORIES).forEach(cat => {
+        const btn = document.createElement("button"); btn.className = "cat-btn";
+        btn.innerText = CATEGORIES[cat].label;
+        btn.onclick = () => showTeacherVideoSubtopic(cat);
+        row.appendChild(btn);
+      });
+    } else {
+      main.innerHTML = `
+        <h2>🎥 Video Lessons</h2>
+        <div class="categories" id="student-video-category-row"></div>
+        <div id="student-video-subtopic-area"></div>
+      `;
+      const row = document.getElementById("student-video-category-row");
+      Object.keys(CATEGORIES).forEach(cat => {
+        const btn = document.createElement("button"); btn.className = "cat-btn";
+        btn.innerText = CATEGORIES[cat].label;
+        btn.onclick = () => { showStudentVideoSubtopics(cat); if(window.innerWidth<=768) hideSidebar(); };
+        row.appendChild(btn);
+      });
+    }
+  } else if(section === 'tasks'){
+    if(role === 'teacher'){
+      main.innerHTML = `
+        <h2>📝 Tasks — Teacher</h2>
+        <div style="margin-top:8px;">
+          <input type="text" id="taskText" placeholder="Enter task description" style="width:70%;padding:8px;border-radius:6px;border:1px solid #ccc" />
+          <button onclick="uploadFile('task')">Add Task</button>
+        </div>
+        <ul class="resource-list" id="taskList" style="margin-top:12px;"></ul>
+      `;
+      displayUploaded('task');
+    } else {
+      // student tasks view
+      fetch(MOCKAPI_URL)
+        .then(res => res.json())
+        .then(data => {
+          const tasks = data.filter(i => i.type === 'task');
+          let html = tasks.length ? tasks.map(t => `<li>📝 ${escapeHtml(t.name)} <span class="meta">(${new Date(t.uploadedAt).toLocaleString()})</span></li>`).join('') : "<li>No tasks yet.</li>";
+          main.innerHTML = `<h2>📝 Assignments</h2><ul class="resource-list">${html}</ul>`;
+        })
+        .catch(err => {
+          main.innerHTML = `<h2>📝 Assignments</h2><p>Error loading tasks.</p>`;
+        });
+    }
+  }
+}
+
+/* Logout */
+function logout(){
+  localStorage.removeItem("current_user");
+  // reload to show home
+  location.reload();
+}
+
+// ✅ Show uploaded list (Teacher view) + delete option
+function displayUploaded(type, categoryKey, subKey) {
+  const MOCKAPI_URL = "https://6906e95cb1879c890ed84ed3.mockapi.io/materials";
+  fetch(MOCKAPI_URL)
+    .then(res => res.json())
+    .then(data => {
+      let filtered;
+      if (type === 'pdf')
+        filtered = data.filter(i => i.category === categoryKey && i.subcategory === subKey && i.type === 'pdf');
+      else if (type === 'video')
+        filtered = data.filter(i => i.category === categoryKey && i.subcategory === subKey && i.type === 'video');
+      else if (type === 'task')
+        filtered = data.filter(i => i.type === 'task');
+      else return;
+
+      const listEl = type === 'task'
+        ? document.getElementById("taskList")
+        : type === 'video'
+        ? document.getElementById("videoList")
+        : document.getElementById("materialList");
+
+      if (!listEl) return;
+      listEl.innerHTML = "";
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = "<li>No data uploaded yet.</li>";
+        return;
+      }
+
+      filtered.forEach((item, idx) => {
+        let content = "";
+        if (type === 'pdf') content = `📄 ${item.name}`;
+        if (type === 'video') content = `🎥 <a href="${item.name}" target="_blank">${item.name}</a>`;
+        if (type === 'task') content = `📝 ${item.name}`;
+
+        const li = document.createElement("li");
+        li.innerHTML = `${content} <span class="meta">(${new Date(item.uploadedAt).toLocaleString()})</span>`;
+        
+        // ✅ Add Delete button for teacher
+        const delBtn = document.createElement("button");
+        delBtn.className = "small-btn";
+        delBtn.textContent = "Delete";
+        delBtn.onclick = () => deleteFromMockAPI(item.id, type, categoryKey, subKey);
+        
+        li.appendChild(delBtn);
+
+        listEl.appendChild(li);
+      });
+    });
+}
+
+
+</script> </body></html>
+<!--function dataURLToBlob(dataURL) {
+  dataURL = dataURL.replace(/\s/g, '');
+  const arr = dataURL.split(',');
+  const mimeMatch = arr[0].match(/:(.*?);/);
+  const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+  const bstr = atob(arr[1]);
+  const n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  for (let i = 0; i < n; i++) u8arr[i] = bstr.charCodeAt(i);
+  return new Blob([u8arr], { type: mime });
+}
+-->
